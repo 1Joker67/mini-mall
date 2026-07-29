@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
+import { getCurrentUser } from '@/lib/auth';
+import AuthStatus from '@/components/ui/AuthStatus';
 import './globals.css';
 
 const geistSans = Geist({
@@ -21,11 +23,13 @@ export const metadata: Metadata = {
 /**
  * 根布局，包含全局导航栏
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="zh-CN"
@@ -57,12 +61,7 @@ export default function RootLayout({
               >
                 我的订单
               </Link>
-              <Link
-                href="/login"
-                className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-              >
-                登录
-              </Link>
+              <AuthStatus user={user} />
             </nav>
           </div>
         </header>
