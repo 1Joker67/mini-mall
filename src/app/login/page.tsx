@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 /**
- * 登录页面
+ * 登录表单（使用 useSearchParams 读取 redirect 参数）
  */
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -33,8 +36,8 @@ export default function LoginPage() {
         return;
       }
 
-      // 登录成功，跳转首页
-      router.push('/');
+      // 登录成功，跳转目标页面（follow redirect 参数）
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError('网络错误，请稍后重试');
@@ -46,7 +49,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
-        {/* 标题 */}
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-bold text-blue-600">
             🛍 Mini Mall
@@ -55,24 +57,18 @@ export default function LoginPage() {
           <p className="mt-1 text-sm text-gray-500">欢迎回来</p>
         </div>
 
-        {/* 表单 */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-sm p-6 space-y-4"
         >
-          {/* 错误提示 */}
           {error && (
             <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
-          {/* 邮箱 */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               邮箱
             </label>
             <input
@@ -86,12 +82,8 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* 密码 */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               密码
             </label>
             <input
@@ -105,7 +97,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* 提交 */}
           <button
             type="submit"
             disabled={loading}
@@ -114,19 +105,14 @@ export default function LoginPage() {
             {loading ? '登录中...' : '登录'}
           </button>
 
-          {/* 注册入口 */}
           <p className="text-center text-sm text-gray-500">
             还没有账号？{' '}
-            <Link
-              href="/register"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
+            <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
               立即注册
             </Link>
           </p>
         </form>
 
-        {/* 预设账号提示 */}
         <div className="mt-4 bg-blue-50 rounded-lg p-4 text-xs text-blue-700">
           <p className="font-medium mb-1">测试账号</p>
           <p>管理员：admin@minimall.com / admin123</p>
@@ -134,5 +120,20 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * 登录页面（Suspense 包装 useSearchParams）
+ */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        加载中...
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
