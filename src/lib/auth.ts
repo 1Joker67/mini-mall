@@ -98,6 +98,15 @@ export async function getCurrentUser() {
 }
 
 /**
+ * 管理员权限校验，非 ADMIN 返回 null
+ */
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'ADMIN') return null;
+  return user;
+}
+
+/**
  * 清除 session Cookie（退出登录）
  */
 export async function clearSession() {
