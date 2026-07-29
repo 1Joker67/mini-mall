@@ -144,34 +144,32 @@ export async function PUT(
         );
       }
 
-      // 模拟支付：PENDING → PAID，累加消费金额，升级会员
+      // 模拟支付：PENDING → PAID，累加消费金额，升级会员（均在事务内保证原子性）
       await prisma.$transaction(async (tx) => {
         await tx.order.update({
           where: { id: orderId },
           data: { status: 'PAID' },
         });
 
-        // 累加用户消费金额
+        // 读取用户当前消费
+        const currentUser = await tx.user.findUnique({
+          where: { id: user.id },
+        });
+
+        if (!currentUser) throw new Error('用户不存在');
+
+        const newTotalSpent = currentUser.totalSpent + order.totalAmount;
+        const newLevel = getMembershipLevel(newTotalSpent);
+
+        // 原子性更新：累加消费 + 升级会员等级
         await tx.user.update({
           where: { id: user.id },
-          data: { totalSpent: { increment: order.totalAmount } },
+          data: {
+            totalSpent: newTotalSpent,
+            membershipLevel: newLevel.level,
+          },
         });
       });
-
-      // 重新读取用户，计算会员等级升级
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: user.id },
-      });
-
-      if (updatedUser) {
-        const newLevel = getMembershipLevel(updatedUser.totalSpent);
-        if (newLevel.level !== updatedUser.membershipLevel) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { membershipLevel: newLevel.level },
-          });
-        }
-      }
 
       return NextResponse.json({ status: 'PAID' });
     }

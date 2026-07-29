@@ -7,7 +7,6 @@ import OrderStatusBadge from '@/components/order/OrderStatusBadge';
 
 /** 订单数据结构 */
 interface OrderItem {
-  orderId?: number;
   id: number;
   originalAmount: number;
   discountRate: number;

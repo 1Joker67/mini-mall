@@ -1,17 +1,8 @@
 import { getCurrentUser } from '@/lib/auth';
+import { MEMBERSHIP_LEVELS } from '@/lib/membership';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-
-/**
- * 会员等级配置
- */
-const MEMBERSHIP_CONFIG = [
-  { level: 0, name: '普通会员', threshold: 0, discount: '无折扣', next: 8000 },
-  { level: 1, name: '心悦1', threshold: 8000, discount: '9.8 折', next: 80000 },
-  { level: 2, name: '心悦2', threshold: 80000, discount: '9.5 折', next: 800000 },
-  { level: 3, name: '心悦3', threshold: 800000, discount: '9.0 折', next: null },
-];
 
 /**
  * 个人主页
@@ -28,10 +19,10 @@ export default async function ProfilePage() {
     where: { userId: user.id },
   });
 
-  const currentLevel = MEMBERSHIP_CONFIG[user.membershipLevel];
+  const currentLevel = MEMBERSHIP_LEVELS[user.membershipLevel];
   const nextLevel =
     user.membershipLevel < 3
-      ? MEMBERSHIP_CONFIG[user.membershipLevel + 1]
+      ? MEMBERSHIP_LEVELS[user.membershipLevel + 1]
       : null;
 
   // 距离下一级的消费差
@@ -94,7 +85,7 @@ export default async function ProfilePage() {
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-1">当前折扣</p>
               <p className="text-sm font-semibold text-gray-900">
-                {currentLevel.discount}
+                {currentLevel.discountLabel}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
@@ -125,7 +116,7 @@ export default async function ProfilePage() {
             {remaining > 0 ? (
               <p className="text-xs text-gray-400">
                 还差 ¥{remaining.toLocaleString()} 升级到{nextLevel.name}
-                （{nextLevel.discount}）
+                （{nextLevel.discountLabel}）
               </p>
             ) : (
               <p className="text-xs text-green-600">

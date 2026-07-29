@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || '');
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+
+// 启动时校验 JWT 密钥必须设置
+if (!process.env.JWT_SECRET) {
+  throw new Error('缺少 JWT_SECRET 环境变量，请检查 .env 文件');
+}
 const COOKIE_NAME = 'session';
 
 /** 需要登录的路由 */

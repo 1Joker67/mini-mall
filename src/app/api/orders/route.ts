@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-import { getMembershipLevel, getDiscountRate } from '@/lib/membership';
+import { getDiscountRate } from '@/lib/membership';
 
 /**
  * GET /api/orders
