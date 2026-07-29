@@ -85,6 +85,26 @@ export default function CartPage() {
     fetchCart();
   };
 
+  // 提交订单
+  const submitOrder = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || '下单失败');
+        return;
+      }
+      // 跳转到订单详情页
+      router.push(`/orders/${data.id}`);
+    } catch {
+      setError('网络错误');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -239,10 +259,11 @@ export default function CartPage() {
                 </span>
               </div>
               <button
-                onClick={() => router.push('/checkout')}
-                className="w-full py-3 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+                onClick={submitOrder}
+                disabled={loading}
+                className="w-full py-3 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 disabled:opacity-50 transition-colors"
               >
-                提交订单
+                {loading ? '提交中...' : '提交订单'}
               </button>
             </div>
           </>
