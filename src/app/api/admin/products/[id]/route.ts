@@ -12,6 +12,28 @@ const updateSchema = z.object({
   image: z.string().optional(),
 });
 
+/** GET /api/admin/products/[id] — 商品详情 */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await requireAdmin();
+  if (!admin) return NextResponse.json({ error: '无权限' }, { status: 403 });
+
+  const { id } = await params;
+  const productId = parseInt(id, 10);
+  if (isNaN(productId)) return NextResponse.json({ error: '无效 ID' }, { status: 400 });
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: { category: { select: { id: true, name: true } } },
+  });
+
+  if (!product) return NextResponse.json({ error: '商品不存在' }, { status: 404 });
+
+  return NextResponse.json(product);
+}
+
 /** PUT /api/admin/products/[id] — 更新商品 */
 export async function PUT(
   request: NextRequest,

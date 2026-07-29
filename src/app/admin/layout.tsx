@@ -26,7 +26,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* 侧边栏 */}
-      <aside className="w-56 bg-white border-r border-gray-200 shrink-0 hidden md:block">
+      <aside className="w-56 bg-white border-r border-gray-200 shrink-0 hidden md:flex md:flex-col">
         <div className="px-6 py-5 border-b border-gray-100">
           <Link href="/" className="text-lg font-bold text-blue-600">
             🛍 Mini Mall
