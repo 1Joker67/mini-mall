@@ -36,8 +36,12 @@ function LoginForm() {
         return;
       }
 
-      // 登录成功，跳转目标页面（follow redirect 参数）
-      router.push(redirectTo);
+      // 管理员自动跳转后台，普通用户跟随 redirect 参数或回首页
+      if (data.role === 'ADMIN' && redirectTo === '/') {
+        router.push('/admin');
+      } else {
+        router.push(redirectTo);
+      }
       router.refresh();
     } catch {
       setError('网络错误，请稍后重试');
