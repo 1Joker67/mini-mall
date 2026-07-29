@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword, setSession } from '@/lib/auth';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 // 登录请求校验
 const loginSchema = z.object({
@@ -18,6 +19,16 @@ const loginSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // 频率限制：每个 IP 每分钟最多 5 次登录尝试
+    const ip = getClientIP(request);
+    const { allowed } = checkRateLimit(`login:${ip}`, 5, 60_000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: '请求过于频繁，请稍后再试' },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
 
