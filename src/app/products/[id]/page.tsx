@@ -7,19 +7,6 @@ interface ProductDetailPageProps {
 }
 
 /**
- * 获取商品详情（带分类信息）
- */
-async function getProduct(id: number) {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  });
-  return product;
-}
-
-/**
  * 商品详情页
  */
 export default async function ProductDetailPage({
@@ -32,7 +19,12 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const product = await getProduct(productId);
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: {
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
   if (!product) {
     notFound();

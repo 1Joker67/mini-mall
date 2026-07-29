@@ -76,6 +76,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <form className="flex gap-2 max-w-xl mx-auto">
+            {categorySlug && (
+              <input type="hidden" name="category" value={categorySlug} />
+            )}
             <input
               type="text"
               name="search"
