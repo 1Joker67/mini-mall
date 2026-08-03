@@ -1,22 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AddToCartButton from '@/components/cart/AddToCartButton';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-/**
- * 获取商品详情（带分类信息）
- */
-async function getProduct(id: number) {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      category: { select: { id: true, name: true, slug: true } },
-    },
-  });
-  return product;
 }
 
 /**
@@ -32,7 +20,12 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const product = await getProduct(productId);
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: {
+      category: { select: { id: true, name: true, slug: true } },
+    },
+  });
 
   if (!product) {
     notFound();
@@ -119,16 +112,7 @@ export default async function ProductDetailPage({
 
               {/* 操作按钮 */}
               <div className="mt-auto flex gap-3">
-                <button
-                  disabled={isOutOfStock}
-                  className={`flex-1 px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isOutOfStock
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {isOutOfStock ? '暂时无法购买' : '加入购物车'}
-                </button>
+                <AddToCartButton productId={product.id} stock={product.stock} />
                 <Link
                   href="/"
                   className="px-6 py-3 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors flex items-center"
